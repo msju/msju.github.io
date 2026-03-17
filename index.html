@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Image Download</title>
+<title>Canvas Image Download</title>
 
 <style>
 body{
@@ -16,32 +16,67 @@ img{
   width:90%;
   max-width:500px;
   cursor:pointer;
+  border-radius:10px;
+}
+
+p{
+  color:#666;
 }
 </style>
 
 </head>
 <body>
 
-<h2>이미지를 클릭하면 다운로드됩니다</h2>
+<h2>이미지를 클릭하면 다운로드 됩니다</h2>
 
-<a id="downloadLink">
-  <img id="image">
-</a>
+<img
+  id="downloadImage"
+  crossorigin="anonymous"
+  src="https://picsum.photos/800/500"
+/>
+
+<p>Tap image to download</p>
 
 <script>
 
-const imageUrl = "https://picsum.photos/800/500"
+const img = document.getElementById("downloadImage")
 
-const img = document.getElementById("image")
-const link = document.getElementById("downloadLink")
+img.addEventListener("click", async () => {
 
-img.src = imageUrl
+  try{
 
-// 테스트용 attachment proxy
-link.href =
-"https://images.weserv.nl/?url="
-+ encodeURIComponent(imageUrl.replace("https://",""))
-+ "&download=image.jpg"
+    // 이미지 fetch
+    const response = await fetch(img.src)
+    const blob = await response.blob()
+
+    // blob → bitmap
+    const bitmap = await createImageBitmap(blob)
+
+    const canvas = document.createElement("canvas")
+    const ctx = canvas.getContext("2d")
+
+    canvas.width = bitmap.width
+    canvas.height = bitmap.height
+
+    ctx.drawImage(bitmap,0,0)
+
+    const dataUrl = canvas.toDataURL("image/png")
+
+    const a = document.createElement("a")
+    a.href = dataUrl
+    a.download = "download-image.png"
+    a.click()
+
+    alert("다운로드 시작")
+
+  }catch(e){
+
+    alert("다운로드 실패")
+    console.error(e)
+
+  }
+
+})
 
 </script>
 
